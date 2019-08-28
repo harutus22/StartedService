@@ -1,6 +1,8 @@
 package com.example.startedservice;
 
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -161,6 +163,20 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void startJobService(View view){
+        scheduleJob();
+    }
+
+    private void scheduleJob() {
+        JobScheduler jobScheduler = (JobScheduler)getApplicationContext().
+                getSystemService(JOB_SCHEDULER_SERVICE);
+        ComponentName componentName = new ComponentName(this, MyJobScheduler.class);
+        JobInfo jobInfo = new JobInfo.Builder(1, componentName).
+                setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).
+                setPeriodic(10000).setPersisted(true).build();
+        jobScheduler.schedule(jobInfo);
     }
 
     @Override
