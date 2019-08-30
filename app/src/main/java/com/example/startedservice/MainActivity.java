@@ -10,11 +10,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String BROADCAST_KEY = "paddingKey";
     public static final String BROADCAST_ACTION = "broadcastAction";
     private static int counter = 0;
+
+    private IncomingHandler incomingHandler = new IncomingHandler();
+    private Messenger incomingMessenger = new Messenger(incomingHandler);
     private TextView textView;
     private Messenger messenger;
     private boolean isBound = false;
@@ -54,6 +58,17 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             messenger = new Messenger(service);
             isBound = true;
+
+            IncomingHandler incomingHandler = new IncomingHandler();
+            incomingMessenger = new Messenger(incomingHandler);
+
+            Message message = Message.obtain(null, MyBindService.COUNTER_CODE);
+            message.replyTo = incomingMessenger;
+            try {
+                messenger.send(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -199,5 +214,20 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(data.getStringExtra(MyPendingIntentService.TEXT_MESSAGE));
         }
 
+    }
+
+    class IncomingHandler extends Handler{
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 10:
+                    textView.setText(String.valueOf(msg.what));
+                    break;
+
+                    default:
+                        super.handleMessage(msg);
+            }
+        }
     }
 }

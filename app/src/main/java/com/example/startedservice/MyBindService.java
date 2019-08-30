@@ -71,6 +71,14 @@ public class MyBindService extends IntentService {
                         e.printStackTrace();
                     }
                 }
+                try {
+                    messenger = msg.replyTo;
+                    Message message = new Message();
+                    message.what = i;
+                    messenger.send(message);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             } else if(msg.what == STOP_SERVICE){
                 stopSelf();
             }
