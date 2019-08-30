@@ -58,17 +58,6 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             messenger = new Messenger(service);
             isBound = true;
-
-            IncomingHandler incomingHandler = new IncomingHandler();
-            incomingMessenger = new Messenger(incomingHandler);
-
-            Message message = Message.obtain(null, MyBindService.COUNTER_CODE);
-            message.replyTo = incomingMessenger;
-            try {
-                messenger.send(message);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -164,11 +153,13 @@ public class MainActivity extends AppCompatActivity {
         if(isBound && !isBoundStarted) {
             isBoundStarted = true;
             message.what = MyBindService.COUNTER_CODE;
+            message.replyTo = incomingMessenger;
             try {
                 messenger.send(message);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+
         } else if (isBound && isBoundStarted){
             isBoundStarted = false;
             message.what = MyBindService.STOP_SERVICE;
